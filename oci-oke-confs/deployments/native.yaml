@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vaulidate-native
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vaulidate-native
+  namespace: vaulidate-native
+
+---
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: vaulidate-native
+    namespace: vaulidate-native
+    labels:
+      app: vaulidate-native
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: vaulidate-native
+    template:
+      metadata:
+        namespace: vaulidate-native
+        labels:
+          app: vaulidate-native
+      spec:
+        containers:
+        - name: vaulidate
+          image: wallacepf/vaulidate:gha
+          env:
+            - name: VAULT_ADDR
+              value: "https://vault.vault.svc.cluster.local:8200"
+            - name: SECURE
+              value: "yes"
+            - name: VAULT_MODE
+              value: "native"
+            - name: ROLE_ID
+              value: ""
+            - name: SECRET_ID
+              value: ""
+            - name: SECRET_PATH
+              value: "secrets/data/vaulidate/mysecret"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaulidate-native
+  namespace: vaulidate-native
+spec:
+  type: LoadBalancer
+  selector:
+    app: vaulidate-native
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8080

@@ -1,0 +1,118 @@
+global:
+  enabled: true
+  tlsDisable: false
+
+injector:
+  enabled: true
+  image:
+    repository: "hashicorp/vault-k8s"
+    tag: "latest"
+
+server:
+  image:
+    repository: "hashicorp/vault-enterprise"
+    tag: "1.12.2-ent"
+  
+  volumes:
+    - name: userconfig-vault-server-tls
+      secret:
+        secretName: vault-server-tls
+    - name: vault-license
+      secret:
+        secretName: vault-license
+  volumeMounts:
+    - mountPath: /vault/userconfig/vault-server-tls
+      name: userconfig-vault-server-tls
+      readOnly: true
+    - mountPath: /vault/userconfig/vault-license/
+      name: vault-license
+      readOnly: true
+
+  # affinity: ""
+  updateStrategyType: "RollingUpdate"
+
+  auditStorage:
+    enabled: false
+    size: 10Gi
+  dataStorage:
+    enabled: true
+    size: 10Gi
+  service:
+    enabled: true
+    type: ClusterIP
+    standby: 
+      enabled: false
+    # annotations: {
+    #   oci.oraclecloud.com/load-balancer-type: "lb"
+    # }
+  ha:
+    enabled: true
+    replicas: 3
+    apiAddr: "https://$(VAULT_K8S_POD_NAME).vault-internal:8200"
+    raft:
+      enabled: true
+      setNodeId: true
+
+      config: |
+        ui = true
+
+        license_path = "/vault/userconfig/vault-license/license.hclic"
+
+        listener "tcp" {
+          tls_disable = false
+          tls_cert_file      = "/vault/userconfig/vault-server-tls/vault.crt"
+          tls_key_file       = "/vault/userconfig/vault-server-tls/vault.key"
+          tls_client_ca_file = "/vault/userconfig/vault-server-tls/ca.pem"
+          tls_disable_client_certs = true
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+            retry_join {
+              auto_join = "provider=k8s namespace=vault label_selector=\"component=server,app.kubernetes.io/name=vault\""
+              leader_tls_servername = "vault-internal"
+              leader_ca_cert_file = "/vault/userconfig/vault-server-tls/ca.pem"
+            }
+
+          autopilot {
+            cleanup_dead_servers = "true"
+            last_contact_threshold = "200ms"
+            last_contact_failure_threshold = "10m"
+            max_trailing_logs = 250000
+            min_quorum = 2
+            server_stabilization_time = "10s"
+          }
+        }
+
+        seal "awskms" {}
+
+        service_registration "kubernetes" {}
+  
+  extraEnvironmentVars:
+    VAULT_CAPATH: /vault/userconfig/vault-server-tls/ca.pem
+    VAULT_ADDR: https://$(VAULT_K8S_POD_NAME).vault-internal:8200
+    VAULT_SKIP_VERIFY: true
+  extraSecretEnvironmentVars:
+    - envName: AWS_REGION
+      secretName: aws-region-info
+      secretKey: AWS_REGION
+    - envName: AWS_ACCESS_KEY_ID
+      secretName: aws-creds
+      secretKey: AWS_ACCESS_KEY_ID
+    - envName: AWS_SECRET_ACCESS_KEY
+      secretName: aws-creds
+      secretKey: AWS_SECRET_ACCESS_KEY
+    - envName: VAULT_AWSKMS_SEAL_KEY_ID
+      secretName: aws-sealkey-id
+      secretKey: VAULT_AWSKMS_SEAL_KEY_ID
+
+ui:
+  enabled: true
+  serviceType: "LoadBalancer"
+  serviceNodePort: null
+  externalPort: 443
+  annotations: {
+    oci.oraclecloud.com/load-balancer-type: "lb"
+  }

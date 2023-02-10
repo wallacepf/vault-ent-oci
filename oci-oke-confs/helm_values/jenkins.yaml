@@ -1,0 +1,16 @@
+controller:
+  serviceType: LoadBalancer
+  # jenkinsUrl:
+  additionalPlugins:
+    - hashicorp-vault-plugin:359.v2da_3b_45f17d5
+    - skip-certificate-check
+
+
+agent:
+  privileged: true
+  podName: default
+  customJenkinsLabels: default
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
