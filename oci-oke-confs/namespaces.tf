@@ -4,8 +4,8 @@ resource "kubernetes_namespace" "vault" {
   }
 }
 
-resource "kubernetes_namespace" "jenkins" {
-  metadata {
-    name = "jenkins"
-  }
-}
+# resource "kubernetes_namespace" "jenkins" {
+#   metadata {
+#     name = "jenkins"
+#   }
+# }

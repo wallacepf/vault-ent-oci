@@ -63,24 +63,24 @@ resource "kubernetes_secret" "vault-server-tls" {
 
 }
 
-resource "kubernetes_secret" "dockercreds" {
-  metadata {
-    name = "dockercreds"
-    namespace = kubernetes_namespace.jenkins.metadata[0].name
-  }
+# resource "kubernetes_secret" "dockercreds" {
+#   metadata {
+#     name = "dockercreds"
+#     namespace = kubernetes_namespace.jenkins.metadata[0].name
+#   }
 
-  data = {
-    ".dockerconfigjson" = templatefile(
-      "config.json",
-      {
-        docker-username = "${var.docker_creds.docker_user}",
-        docker-password = "${var.docker_creds.docker_password}",
-        docker-server   = "${var.docker_creds.docker_server}",
-        docker-email    = "${var.docker_creds.docker_email}",
-        auth            = base64encode("${var.docker_creds.docker_user}:${var.docker_creds.docker_password}")
-      }
-    )
-  }
+#   data = {
+#     ".dockerconfigjson" = templatefile(
+#       "config.json",
+#       {
+#         docker-username = "${var.docker_creds.docker_user}",
+#         docker-password = "${var.docker_creds.docker_password}",
+#         docker-server   = "${var.docker_creds.docker_server}",
+#         docker-email    = "${var.docker_creds.docker_email}",
+#         auth            = base64encode("${var.docker_creds.docker_user}:${var.docker_creds.docker_password}")
+#       }
+#     )
+#   }
 
-  type = "kubernetes.io/dockerconfigjson"
-}
+#   type = "kubernetes.io/dockerconfigjson"
+# }
