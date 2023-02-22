@@ -1,0 +1,10 @@
+injector:
+  enabled: true
+  image:
+    repository: "hashicorp/vault-k8s"
+    tag: "latest"
+  externalVaultAddr: 'VAULT_PUBLIC_ADDR'
+
+  #This is the helm chart template to work with vault in HCP.
+  #Replace VAULT_PUBLIC_ADDR to HCP Public/Private ADDR
+  

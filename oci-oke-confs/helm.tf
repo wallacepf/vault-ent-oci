@@ -1,4 +1,18 @@
-resource "helm_release" "vault" {
+# resource "helm_release" "vault" {
+#   name       = "vault"
+#   repository = "https://helm.releases.hashicorp.com"
+#   chart      = "vault"
+#   version    = "0.23.0"
+#   namespace  = kubernetes_namespace.vault.metadata[0].name
+
+#   reset_values = true
+
+#   values = [
+#     "${file("helm_values/vault_helm.yaml")}"
+#   ]
+# }
+
+resource "helm_release" "vault-external" {
   name       = "vault"
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault"
@@ -8,7 +22,7 @@ resource "helm_release" "vault" {
   reset_values = true
 
   values = [
-    "${file("helm_values/vault_helm.yaml")}"
+    "${file("helm_values/vault_ext.yaml")}"
   ]
 }
 
@@ -24,3 +38,4 @@ resource "helm_release" "vault" {
 #     "${file("helm_values/jenkins.yaml")}"
 #   ]
 # }
+

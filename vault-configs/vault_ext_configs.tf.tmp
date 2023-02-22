@@ -1,0 +1,14 @@
+# Create a token for vault sa as described in file ../oci-oke-confs/deployments/vault-secret.yaml
+# To get all the infos required to configure K8s auth method in vault go to: https://developer.hashicorp.com/vault/tutorials/kubernetes/kubernetes-external-vault
+
+
+resource "vault_kubernetes_auth_backend_config" "oke" {
+  backend                = vault_auth_backend.kubernetes.path
+  kubernetes_host        = var.k8s_host
+  kubernetes_ca_cert     = var.k8s_ca
+  token_reviewer_jwt     = var.k8s_token
+  issuer                 = "https://kubernetes.default.svc.cluster.local"
+  disable_iss_validation = "true"
+}
+
+# Then add your roles, policies, etc

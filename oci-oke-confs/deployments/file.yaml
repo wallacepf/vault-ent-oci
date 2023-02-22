@@ -26,16 +26,19 @@ spec:
   template:
     metadata:
       namespace: vaulidate-file
+      # Annotations now set to work with an external Vault
       annotations:
-        vault.hashicorp.com/tls-skip-verify: "true"
+        # vault.hashicorp.com/tls-skip-verify: "true"
+        vault.hashicorp.com/namespace: "admin/"
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "vaulidate-file"
-        vault.hashicorp.com/agent-inject-secret-config.txt: "postgres/creds/readonly"
-        vault.hashicorp.com/agent-inject-template-config.txt: |
-          {{- with secret "postgres/creds/readonly" -}}
-            postgresql://{{ .Data.username }}:{{ .Data.password }}@postgres:5432/wizard
-          {{- end -}}
-            Using File Mode
+        # vault.hashicorp.com/agent-inject-secret-config.txt: "postgres/creds/readonly"
+        # vault.hashicorp.com/agent-inject-template-config.txt: |
+        #   {{- with secret "postgres/creds/readonly" -}}
+        #     postgresql://{{ .Data.username }}:{{ .Data.password }}@postgres:5432/wizard
+        #   {{- end -}}
+        #     Using File Mode
+        vault.hashicorp.com/agent-inject-secret-config.txt: "secret/data/vaulidate/mysecret"
       labels:
         app: vaulidate-file
     spec:
